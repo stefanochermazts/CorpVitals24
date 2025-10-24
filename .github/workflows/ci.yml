@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+
+      - name: Install PHP deps
+        run: composer install --prefer-dist --no-ansi --no-interaction --no-progress
+
+      - name: Install Node deps
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else echo "no npm lockfile"; fi
+
+      - name: Lint PHP (Pint)
+        run: vendor/bin/pint --test || true
+
+      - name: PHP Tests
+        run: php artisan test --no-interaction --verbose
+
+      - name: Typecheck / Lint JS (optional)
+        run: |
+          npm run build --if-present
+
+

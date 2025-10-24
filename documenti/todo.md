@@ -18,3 +18,4 @@
  - [x] Generare e salvare AGENTS.md (2025-10-23)
  - [x] Creare README.md breve in root (2025-10-23)
  - [x] Kickoff iniziale completato (2025-10-24)
+ - [x] CI GitHub Actions di base attiva (2025-10-24)

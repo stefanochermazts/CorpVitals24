@@ -62,7 +62,7 @@ jobs:
             .
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v5
         with:
           name: corpvitals24-build
           path: artifacts/corpvitals24-${{ github.sha }}.tar.gz

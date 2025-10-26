@@ -19,3 +19,14 @@
  - [x] Creare README.md breve in root (2025-10-23)
  - [x] Kickoff iniziale completato (2025-10-24)
  - [x] CI GitHub Actions di base attiva (2025-10-24)
+
+## MVP Core Implementation (2025-10-25/26)
+- [x] **Step 1**: Frontend Scaffolding - Vue 3.5 + Inertia + TypeScript + Tailwind CSS 4 + Pinia
+- [x] **Step 2**: Sanctum & Spatie Permission - Multi-tenant RBAC setup
+- [x] **Step 3**: Authentication Routes & Controllers - Login/Logout con FormRequest e Vue UI
+- [x] **Step 4**: Database Seeders - Factories e seeders per dati multi-tenant realistici
+- [x] **Step 5**: Dashboard Implementation - Controller, Service, Repository e Vue components con KPI reali
+- [x] **Step 6**: Pinia Stores - State management centralizzato (auth, dashboard, app) + composables
+- [x] **Step 7**: Security Hardening - 8 headers, 4-tier rate limiting, CORS, cookie security, sanitization
+- [x] **Step 8**: Documentation Updates - README, DEPLOYMENT.md, CHANGELOG.md, QUICK_START.md
+- [x] **Step 9**: CI/CD Pipeline - GitHub Actions (CI, Build), Dependabot, Husky, ESLint, Prettier

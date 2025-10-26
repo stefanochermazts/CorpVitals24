@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use App\Http\Middleware\RequestId;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\EnsureUserHasTeam;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -20,17 +23,23 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Security headers per tutte le richieste (web & api)
+        $middleware->append(SecurityHeaders::class);
+
         // Abilita Sanctum per richieste SPA
         $middleware->appendToGroup('web', EnsureFrontendRequestsAreStateful::class);
+        
+        // Inertia middleware per shared data
+        $middleware->appendToGroup('web', HandleInertiaRequests::class);
 
-        // Correlazione richieste nei log
+        // Correlazione richieste nei log (API + Web)
         $middleware->appendToGroup('api', RequestId::class);
-
-        // Rate limiter per API: 60 req/min basato su utente/IP
-        RateLimiter::for('api', function (Request $request) {
-            $key = optional($request->user())->getAuthIdentifier() ?: $request->ip();
-            return Limit::perMinute(60)->by($key);
-        });
+        $middleware->appendToGroup('web', RequestId::class);
+        
+        // Middleware aliases per route
+        $middleware->alias([
+            'ensure.team' => EnsureUserHasTeam::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Problem Details JSON per errori comuni

@@ -2,53 +2,216 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [main, develop]
 
 jobs:
-  build:
+  # Backend Quality Checks
+  backend-quality:
+    name: Backend Quality & Tests
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: corpvitals_test
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: corpvitals24_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
-      - name: Setup PHP
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          tools: composer
+          extensions: mbstring, xml, curl, pdo_pgsql, redis, bcmath
+          coverage: xdebug
+          tools: composer:v2
 
-      - name: Setup Node
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Copy .env.example to .env
+        run: cp .env.example .env
+
+      - name: Generate app key
+        run: php artisan key:generate
+
+      - name: Configure database
+        run: |
+          php artisan config:clear
+          php artisan cache:clear
+
+      - name: Run migrations
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: corpvitals24_test
+          DB_USERNAME: corpvitals_test
+          DB_PASSWORD: test_password
+        run: php artisan migrate --force
+
+      - name: PHP CS Fixer (Lint)
+        run: composer lint || true
+
+      - name: PHPUnit Tests
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: corpvitals24_test
+          DB_USERNAME: corpvitals_test
+          DB_PASSWORD: test_password
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+        run: composer test
+
+      - name: Composer Security Audit
+        run: composer audit || true
+
+  # Frontend Quality Checks
+  frontend-quality:
+    name: Frontend Quality & Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Cache Composer
-        uses: actions/cache@v4
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript Type Check
+        run: npm run typecheck
+
+      - name: ESLint
+        run: npm run lint || true
+
+      - name: npm Security Audit
+        run: npm audit --audit-level=moderate || true
+
+      - name: Build Check
+        run: npm run build
+
+  # Security Scanning
+  security-scan:
+    name: Security Vulnerability Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
         with:
-          path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
 
-      - name: Install PHP deps
-        run: composer install --prefer-dist --no-ansi --no-interaction --no-progress
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
 
-      - name: Install Node deps
+  # Code Quality Analysis
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better analysis
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true  # Non-blocking
+
+  # Dependency Review (only on PRs)
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v3
+        with:
+          fail-on-severity: high
+
+  # All checks passed
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [backend-quality, frontend-quality, security-scan]
+    if: always()
+    
+    steps:
+      - name: Check CI Status
         run: |
-          if [ -f package-lock.json ]; then npm ci; else echo "no npm lockfile"; fi
+          if [ "${{ needs.backend-quality.result }}" != "success" ] || \
+             [ "${{ needs.frontend-quality.result }}" != "success" ]; then
+            echo "❌ CI checks failed"
+            exit 1
+          fi
+          echo "✅ All CI checks passed!"
 
-      - name: Lint PHP (Pint)
-        run: vendor/bin/pint --test || true
-
-      - name: PHP Tests
-        run: php artisan test --no-interaction --verbose
-
-      - name: Typecheck / Lint JS (optional)
+      - name: Success notification
         run: |
-          npm run build --if-present
-
-
+          echo "🎉 CI Pipeline completed successfully!"
+          echo "📊 Backend Quality: ${{ needs.backend-quality.result }}"
+          echo "🎨 Frontend Quality: ${{ needs.frontend-quality.result }}"
+          echo "🔒 Security Scan: ${{ needs.security-scan.result }}"

@@ -1,0 +1,11 @@
+dist
+node_modules
+public/build
+public/hot
+vendor
+storage
+bootstrap/cache
+*.config.js
+*.config.ts
+*.min.js
+

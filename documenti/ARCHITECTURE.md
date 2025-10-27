@@ -104,3 +104,92 @@ class ProcessImport implements ShouldQueue {
 ## Estensioni future
 - Plugin per tassonomie XBRL nazionali, registrati via ServiceProvider.
 - Strategia di MV refresh pianificata (cron/queue) con invalidazione cache granulare.
+
+---
+
+## Integrazione XBRL/iXBRL (ESEF + OIC)
+
+Questa sezione documenta l'architettura estesa per supportare l'import dei bilanci in formato **XBRL/iXBRL**.
+
+### Componenti principali
+- Parser: **Arelle (Python)** invocato via subprocess o Web Server.
+- Services: `XbrlParserService`, `XbrlMappingService`, `DimensionService`.
+- Repositories: `XbrlRepository`, `TaxonomyRepository`.
+- Storage: Tabelle `filings`, `filing_facts`, `taxonomies`, `taxonomy_maps`, `dimension_defs`, `dimension_values`.
+- Cache: Redis per tassonomie e mapping.
+
+### Diagramma componenti
+
+```mermaid
+graph TB
+  subgraph Frontend
+    ImportXBRL[XBRL Import UI]
+    Dashboard[Dashboard KPI]
+  end
+
+  subgraph Controllers
+    XBRLCtrl[XbrlImportController]
+    KpiCtrl[KpiController]
+  end
+
+  subgraph Services
+    ParserSvc[XbrlParserService]
+    MapSvc[XbrlMappingService]
+    DimSvc[DimensionService]
+    KpiSvc[KpiEngineService]
+  end
+
+  subgraph External
+    Arelle[Arelle Python]
+  end
+
+  subgraph Storage
+    DB[(PostgreSQL)]
+    Redis[(Redis Cache)]
+  end
+
+  ImportXBRL --> XBRLCtrl
+  XBRLCtrl --> ParserSvc
+  ParserSvc --> Arelle
+  ParserSvc --> MapSvc
+  MapSvc --> DimSvc
+  MapSvc --> DB
+  DimSvc --> DB
+  KpiSvc --> DB
+  KpiSvc --> Redis
+  KpiCtrl --> KpiSvc
+  Dashboard --> KpiCtrl
+```
+
+### Pipeline di import XBRL
+
+```mermaid
+sequenceDiagram
+  participant UI as XBRL UI
+  participant C as XbrlImportController
+  participant S as XbrlParserService
+  participant A as Arelle
+  participant M as XbrlMappingService
+  participant D as DimensionService
+  participant R as DB
+
+  UI->>C: Upload .xbrl/.ixbrl
+  C->>S: parse(file)
+  S->>A: arelleCmdLine --facts json
+  A-->>S: facts, contexts, units
+  S->>M: autoMap(facts)
+  M->>R: read taxonomy_maps
+  M-->>S: mapped values
+  S->>D: extract & store dimensions
+  D->>R: insert dimension_values
+  S->>R: insert filing_facts & valori_base
+  UI->>C: get status
+  C-->>UI: completed
+```
+
+### Note progettuali
+- Auto‑mapping tramite `taxonomy_maps` con regole di segno e moltiplicatore.
+- Dimensioni: JSONB su `filing_facts` + tabella `dimension_values` per query mirate.
+- Tracciabilità: `valori_base.provenance` collega `filing_fact_id` → KPI.
+- Caching tassonomie/mapping in Redis con TTL 24h e invalidazione su update.
+

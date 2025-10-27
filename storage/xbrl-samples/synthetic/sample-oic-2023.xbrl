@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xbrl xmlns="http://www.xbrl.org/2003/instance"
+      xmlns:xbrli="http://www.xbrl.org/2003/instance"
+      xmlns:itcc-ci="http://www.xbrl.org/int/it/ci/2023-01-01"
+      xmlns:itcc-sp="http://www.xbrl.org/int/it/sp/2023-01-01"
+      xmlns:iso4217="http://www.xbrl.org/2003/iso4217">
+  
+  <context id="ctx_2023_duration">
+    <entity>
+      <identifier scheme="http://www.registro-imprese.it">IT12345678901</identifier>
+    </entity>
+    <period>
+      <startDate>2023-01-01</startDate>
+      <endDate>2023-12-31</endDate>
+    </period>
+  </context>
+  
+  <context id="ctx_2023_instant">
+    <entity>
+      <identifier scheme="http://www.registro-imprese.it">IT12345678901</identifier>
+    </entity>
+    <period>
+      <instant>2023-12-31</instant>
+    </period>
+  </context>
+  
+  <unit id="EUR">
+    <measure>iso4217:EUR</measure>
+  </unit>
+  
+  <!-- Conto Economico -->
+  <itcc-ci:RicaviVendite contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    2500000
+  </itcc-ci:RicaviVendite>
+  
+  <itcc-ci:CostiProduzione contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    -1500000
+  </itcc-ci:CostiProduzione>
+  
+  <itcc-ci:CostiPersonale contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    -400000
+  </itcc-ci:CostiPersonale>
+  
+  <itcc-ci:Ammortamenti contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    -150000
+  </itcc-ci:Ammortamenti>
+  
+  <itcc-ci:OneriFinanziari contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    -50000
+  </itcc-ci:OneriFinanziari>
+  
+  <itcc-ci:Imposte contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    -120000
+  </itcc-ci:Imposte>
+  
+  <itcc-ci:UtilePerditaEsercizio contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    280000
+  </itcc-ci:UtilePerditaEsercizio>
+  
+  <!-- Stato Patrimoniale -->
+  <itcc-sp:TotaleAttivo contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    5000000
+  </itcc-sp:TotaleAttivo>
+  
+  <itcc-sp:AttivoCircolante contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    2000000
+  </itcc-sp:AttivoCircolante>
+  
+  <itcc-sp:Immobilizzazioni contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    3000000
+  </itcc-sp:Immobilizzazioni>
+  
+  <itcc-sp:DisponibilitaLiquide contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    300000
+  </itcc-sp:DisponibilitaLiquide>
+  
+  <itcc-sp:Crediti contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    600000
+  </itcc-sp:Crediti>
+  
+  <itcc-sp:Rimanenze contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    400000
+  </itcc-sp:Rimanenze>
+  
+  <itcc-sp:TotalePassivo contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    3000000
+  </itcc-sp:TotalePassivo>
+  
+  <itcc-sp:PassivitaCorrente contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    1000000
+  </itcc-sp:PassivitaCorrente>
+  
+  <itcc-sp:DebitiEntroAnno contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    450000
+  </itcc-sp:DebitiEntroAnno>
+  
+  <itcc-sp:PatrimonioNetto contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    2000000
+  </itcc-sp:PatrimonioNetto>
+  
+</xbrl>

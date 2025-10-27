@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xbrl xmlns="http://www.xbrl.org/2003/instance"
+      xmlns:xbrli="http://www.xbrl.org/2003/instance"
+      xmlns:ifrs-full="http://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full"
+      xmlns:iso4217="http://www.xbrl.org/2003/iso4217"
+      xmlns:xlink="http://www.w3.org/1999/xlink">
+  
+  <!-- Contexts -->
+  <context id="ctx_2023_duration">
+    <entity>
+      <identifier scheme="http://www.example.com">SYNTHETIC-001</identifier>
+    </entity>
+    <period>
+      <startDate>2023-01-01</startDate>
+      <endDate>2023-12-31</endDate>
+    </period>
+  </context>
+  
+  <context id="ctx_2023_instant">
+    <entity>
+      <identifier scheme="http://www.example.com">SYNTHETIC-001</identifier>
+    </entity>
+    <period>
+      <instant>2023-12-31</instant>
+    </period>
+  </context>
+  
+  <!-- Units -->
+  <unit id="EUR">
+    <measure>iso4217:EUR</measure>
+  </unit>
+  
+  <!-- Income Statement Facts -->
+  <ifrs-full:Revenue contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    5000000
+  </ifrs-full:Revenue>
+  
+  <ifrs-full:CostOfSales contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    -3000000
+  </ifrs-full:CostOfSales>
+  
+  <ifrs-full:OperatingExpense contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    -800000
+  </ifrs-full:OperatingExpense>
+  
+  <ifrs-full:DepreciationAndAmortisationExpense contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    -200000
+  </ifrs-full:DepreciationAndAmortisationExpense>
+  
+  <ifrs-full:FinanceCosts contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    -100000
+  </ifrs-full:FinanceCosts>
+  
+  <ifrs-full:IncomeTaxExpense contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    -270000
+  </ifrs-full:IncomeTaxExpense>
+  
+  <ifrs-full:ProfitLoss contextRef="ctx_2023_duration" unitRef="EUR" decimals="0">
+    630000
+  </ifrs-full:ProfitLoss>
+  
+  <!-- Balance Sheet Facts -->
+  <ifrs-full:Assets contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    10000000
+  </ifrs-full:Assets>
+  
+  <ifrs-full:CurrentAssets contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    4000000
+  </ifrs-full:CurrentAssets>
+  
+  <ifrs-full:NoncurrentAssets contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    6000000
+  </ifrs-full:NoncurrentAssets>
+  
+  <ifrs-full:CashAndCashEquivalents contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    500000
+  </ifrs-full:CashAndCashEquivalents>
+  
+  <ifrs-full:TradeAndOtherCurrentReceivables contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    1200000
+  </ifrs-full:TradeAndOtherCurrentReceivables>
+  
+  <ifrs-full:Inventories contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    800000
+  </ifrs-full:Inventories>
+  
+  <ifrs-full:Liabilities contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    6000000
+  </ifrs-full:Liabilities>
+  
+  <ifrs-full:CurrentLiabilities contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    2000000
+  </ifrs-full:CurrentLiabilities>
+  
+  <ifrs-full:NoncurrentLiabilities contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    4000000
+  </ifrs-full:NoncurrentLiabilities>
+  
+  <ifrs-full:TradeAndOtherCurrentPayables contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    900000
+  </ifrs-full:TradeAndOtherCurrentPayables>
+  
+  <ifrs-full:Equity contextRef="ctx_2023_instant" unitRef="EUR" decimals="0">
+    4000000
+  </ifrs-full:Equity>
+  
+</xbrl>

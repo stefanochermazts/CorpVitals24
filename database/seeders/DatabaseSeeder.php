@@ -21,6 +21,12 @@ class DatabaseSeeder extends Seeder
         // 2. KPI definitions (master data)
         $this->call(KpisSeeder::class);
 
+        // 2b. XBRL taxonomies and default mappings
+        $this->call([
+            TaxonomiesSeeder::class,
+            TaxonomyMapsSeeder::class,
+        ]);
+
         // 3. Tenants, Teams, Companies, Users (dati multi-tenant)
         $this->call(TenantsSeeder::class);
 

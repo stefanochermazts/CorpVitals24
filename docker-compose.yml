@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  arelle:
+    build:
+      context: .
+      dockerfile: docker/arelle/Dockerfile
+    container_name: arelle
+    restart: unless-stopped
+    volumes:
+      - ./storage:/storage
+    ports:
+      - "8080:8080"
+
+

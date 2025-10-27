@@ -75,11 +75,11 @@ class SecurityHeaders
         $directives = [
             // Script sources: self + Vite dev server
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173",
-            "style-src 'self' 'unsafe-inline' http://localhost:5173 https://fonts.bunny.net",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173 http://127.0.0.1:5173",
+            "style-src 'self' 'unsafe-inline' http://localhost:5173 http://127.0.0.1:5173 https://fonts.bunny.net",
             "img-src 'self' data: https:",
             "font-src 'self' https://fonts.bunny.net",
-            "connect-src 'self' ws://localhost:5173 http://localhost:5173",
+            "connect-src 'self' ws://localhost:5173 ws://127.0.0.1:5173 http://localhost:5173 http://127.0.0.1:5173",
             "frame-ancestors 'none'",
             "base-uri 'self'",
             "form-action 'self'",
@@ -90,7 +90,7 @@ class SecurityHeaders
         if (config('app.env') === 'production') {
             $directives = array_map(
                 fn ($directive) => str_replace(
-                    ["'unsafe-inline'", "'unsafe-eval'", 'http://localhost:5173', 'ws://localhost:5173'],
+                    ["'unsafe-inline'", "'unsafe-eval'", 'http://localhost:5173', 'http://127.0.0.1:5173', 'ws://localhost:5173', 'ws://127.0.0.1:5173'],
                     '',
                     $directive
                 ),

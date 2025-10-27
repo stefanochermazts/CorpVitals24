@@ -11,6 +11,7 @@ class KpiValue extends Model
 
     protected $fillable = ['period_id', 'kpi_id', 'value', 'unit', 'state', 'provenance_json'];
     protected $casts = [
+        'value' => 'float',
         'provenance_json' => 'array',
     ];
 

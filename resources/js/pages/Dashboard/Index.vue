@@ -26,8 +26,17 @@ onMounted(() => {
 const summary = computed(() => dashboardStore.summary || props.summary);
 const userName = computed(() => authStore.user?.name || 'User');
 
-const formatValue = (value: number | null, displayFormat: string, unit: string): string => {
-  if (value === null) {
+const formatValue = (value: number | null | undefined, displayFormat: string, unit: string): string => {
+  // Handle null, undefined, or non-numeric values
+  if (value === null || value === undefined || value === '') {
+    return 'N/A';
+  }
+
+  // Convert to number if it's a string
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+  
+  // Check if conversion resulted in a valid number
+  if (isNaN(numValue)) {
     return 'N/A';
   }
 
@@ -37,22 +46,22 @@ const formatValue = (value: number | null, displayFormat: string, unit: string):
       currency: 'EUR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(value);
+    }).format(numValue);
   }
 
   if (displayFormat === 'percentage' || unit === '%') {
-    return `${value.toFixed(2)}%`;
+    return `${numValue.toFixed(2)}%`;
   }
 
   if (unit === 'days') {
-    return `${Math.round(value)} giorni`;
+    return `${Math.round(numValue)} giorni`;
   }
 
   if (unit === 'ratio') {
-    return value.toFixed(2);
+    return numValue.toFixed(2);
   }
 
-  return value.toLocaleString('it-IT', {
+  return numValue.toLocaleString('it-IT', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   });

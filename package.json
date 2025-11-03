@@ -34,7 +34,7 @@
     "dependencies": {
         "@headlessui/vue": "^1.7.23",
         "@heroicons/vue": "^2.2.0",
-        "@inertiajs/vue3": "^2.2.11",
+        "@inertiajs/vue3": "^2.2.15",
         "@vee-validate/zod": "^4.15.1",
         "@vitejs/plugin-vue": "^6.0.1",
         "@vueuse/core": "^14.0.0",
